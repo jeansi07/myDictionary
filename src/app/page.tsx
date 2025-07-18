@@ -1,7 +1,7 @@
 "use client";
 
 import { getDictionaryAll } from "@/api/get";
-import { Divider, InputSearch } from "@/components";
+import { Divider, HistoryEntry, InputSearch, Modal } from "@/components";
 import { DictionaryResponse } from "@/Interfaces/Request";
 import { PlayIcon } from "@heroicons/react/24/solid";
 import dynamic from "next/dynamic";
@@ -18,6 +18,7 @@ const SelectType = dynamic(() => import("@/components/SelectType/SelectType"), {
 
 export default function Home() {
   const [search, setSearch] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [word, setWord] = useState<DictionaryResponse | undefined>(undefined);
 
   const firstPhonetic = word?.phonetics?.find((p) => p.text);
@@ -34,8 +35,16 @@ export default function Home() {
   const getData = async () => {
     try {
       const response = await getDictionaryAll(search);
-      console.log("dictionary", response);
-      setWord(response?.at(0));
+      const data = response?.at(0);
+
+      setWord(data);
+      if (data?.word) {
+        const newEntry: HistoryEntry = {
+          word: data.word,
+          date: new Date(),
+        };
+        setHistory((prev) => [...prev, newEntry]);
+      }
     } catch (error) {
       setWord(undefined);
     }
@@ -52,6 +61,7 @@ export default function Home() {
   return (
     <div className="lg:flex lg:flex-col lg:py-10 lg:px-72 px-5 py-2 flex flex-col gap-6 h-full">
       <div className="flex justify-end gap-2">
+        <Modal history={history} />
         <SelectType />
         <ThemeToggle />
       </div>
