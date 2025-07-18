@@ -23,7 +23,7 @@ export const SelectType: React.FC = () => {
     <select
       value={selectFont}
       onChange={changeSelectFonts}
-      className="p-2 rounded-full flex w-20 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+      className="p-2 rounded-full flex w-36 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
       aria-label="Toggle theme"
     >
       {fonts.map((font) => (

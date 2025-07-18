@@ -18,7 +18,7 @@ export const InputSearch: React.FC<InputSearchProps> = ({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder="Search..."
-        className={`w-full border bg-gray-100 border-gray-300 rounded-md py-2 pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500${
+        className={`w-full border dark:text-black bg-gray-100 border-gray-300 rounded-md py-2 pl-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500${
           className ? ` ${className}` : ""
         }`}
       />
