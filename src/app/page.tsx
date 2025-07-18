@@ -1,103 +1,132 @@
-import Image from "next/image";
+"use client";
+
+import { getDictionaryAll } from "@/api/get";
+import { Divider, InputSearch } from "@/components";
+import { DictionaryResponse } from "@/Interfaces/Request";
+import { PlayIcon } from "@heroicons/react/24/solid";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+const ThemeToggle = dynamic(
+  () => import("@/components/ThemeToggle/ThemeToggle"),
+  {
+    ssr: false,
+  }
+);
+const SelectType = dynamic(() => import("@/components/SelectType/SelectType"), {
+  ssr: false,
+});
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [search, setSearch] = useState("");
+  const [word, setWord] = useState<DictionaryResponse | undefined>(undefined);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const firstPhonetic = word?.phonetics?.find((p) => p.text);
+  const firstAudio = word?.phonetics?.find((p) => p.audio);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handlePlay = () => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
+  const getData = async () => {
+    try {
+      const response = await getDictionaryAll(search);
+      console.log("dictionary", response);
+      setWord(response?.at(0));
+    } catch (error) {
+      setWord(undefined);
+    }
+  };
+
+  useEffect(() => {
+    if (search) {
+      getData();
+    } else {
+      setWord(undefined);
+    }
+  }, [search]);
+
+  return (
+    <div className="lg:flex lg:flex-col lg:py-10 lg:px-72 px-5 py-2 flex flex-col gap-6 h-full">
+      <div className="flex justify-end gap-2">
+        <SelectType />
+        <ThemeToggle />
+      </div>
+
+      <InputSearch className="w-full" onChange={setSearch} value={search} />
+      {!search && (
+        <p className="text-gray-500 text-center mt-4">Enter a word to search</p>
+      )}
+
+      {search && word === undefined && (
+        <p className="text-red-500 text-center mt-4">
+          No word found <strong>"{search}"</strong>.
+        </p>
+      )}
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-7xl">{search}</h1>
+          {firstPhonetic?.text && (
+            <p className="text-lg">
+              <span className="font-semibold, text-purple-700">
+                {firstPhonetic.text}
+              </span>
+            </p>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="mb-4">
+          {firstAudio?.audio && (
+            <>
+              <button
+                onClick={handlePlay}
+                className="flex justify-center items-center bg-purple-300 w-15 h-15 hover:bg-purple-300 hover:cursor-pointer text-white p-2 rounded-full"
+                aria-label="Play pronunciation"
+              >
+                <PlayIcon className="h-5 w-5 text-purple-800" />
+              </button>
+
+              <audio ref={audioRef} src={firstAudio.audio} />
+            </>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <ul className="list-disc list-inside text-gray-500 dark:text-white gap-2">
+          {word?.meanings.map((meaning, meaningIndex) => (
+            <div className="flex flex-col gap-3" key={meaningIndex}>
+              <p className="mt-2">Meaning</p>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold capitalize">{meaning.partOfSpeech}</h3>
+                <Divider />
+              </div>
+
+              <ul className="list-disc list-inside">
+                {meaning.definitions.map((def, defIndex) => (
+                  <li key={defIndex}>{def.definition}</li>
+                ))}
+              </ul>
+
+              {meaning.synonyms.length > 0 && (
+                <div className="mb-1">
+                  <span className="font-semibold">Synonyms: </span>
+                  {meaning.synonyms.map((syn, synIndex) => (
+                    <span key={synIndex} className="text-purple-400">
+                      {syn}
+                      {synIndex < meaning.synonyms.length - 1 && ", "}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
